@@ -7,6 +7,10 @@ class Fixer
   end
 
   def run left, right, prefix
+    leftout = ""
+    rightout = ""
+    buffersize = 200000
+    buffer = 0
     data = {}
     cont = true
     lh = File.open(left)
@@ -27,9 +31,17 @@ class Fixer
       if name1
         shortname1 = name1[0..-3]
         if data[shortname1]
-          lout.write "#{name1}\n#{seq1}+\n#{quals1}"
-          rout.write data[shortname1][1]
+          leftout << "#{name1}\n#{seq1}+\n#{quals1}"
+          rightout << data[shortname1][1]
+          buffer+=1
           data.delete(shortname1)
+          if buffer>=buffersize
+            lout.write leftout
+            leftout=""
+            rout.write rightout
+            rightout=""
+            buffer=0
+          end
         else
           data[shortname1]=[]
           data[shortname1][0]="#{name1}\n#{seq1}+\n#{quals1}"
@@ -38,9 +50,17 @@ class Fixer
       if name2
         shortname2 = name2[0..-3]
         if data[shortname2]
-          lout.write data[shortname2][0]
-          rout.write "#{name2}\n#{seq2}+\n#{quals2}"
+          leftout << data[shortname2][0]
+          rightout << "#{name2}\n#{seq2}+\n#{quals2}"
+          buffer+=1
           data.delete(shortname2)
+          if buffer>=buffersize
+            lout.write leftout
+            leftout=""
+            rout.write rightout
+            rightout=""
+            buffer=0
+          end
         else
           data[shortname2]=[]
           data[shortname2][1]="#{name2}\n#{seq2}+\n#{quals2}"
@@ -53,6 +73,9 @@ class Fixer
         cont=false
       end
     end
+
+    lout.write leftout
+    rout.write rightout
     lout.close
     rout.close
 
