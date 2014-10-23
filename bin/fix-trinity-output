@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+# fix bullshit trinity output files
+
+require 'trollop'
+
+ARGV[0] = "--help" if ARGV.length() == 0
+
+opts = Trollop::options do
+  banner <<-EOS
+fix-trinity-output v1.0
+
+Trinity outputs fastq files that have been 'corrected'
+
+Unfortunately these files are no longer properly paired and therefore
+can't be used in most aligners such as bowtie2 and snap
+
+This script attempts to fix that and produce 2 properly paired fastq
+files and a fastq file containing single reads
+
+Options:
+  EOS
+  opt :left, "fastq file of left reads", :type => String, :required => true
+  opt :right, "fastq file of right reads", :type => String, :required => true
+  opt :output, "output prefix", :type => String, :required => true
+end
+
+left = File.expand_path(opts.left)
+right = File.expand_path(opts.right)
+if left and right
+  if !File.exist?(left)
+    Trollop::die "#{left} not found"
+  end
+  if !File.exist?(right)
+    Trollop::die "#{right} not found"
+  end
+end
+
+fixer = Fixer.new
+
+fixer.run(left, right, opts.output)

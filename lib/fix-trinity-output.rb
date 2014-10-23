@@ -1,0 +1,1 @@
+require 'fix-trinity-output/fix-trinity-output.rb'
